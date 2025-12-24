@@ -1,0 +1,327 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Merry Christmas 🎄</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',Tahoma,Verdana,sans-serif;
+}
+body{
+    position:fixed;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+}
+
+/* Background */
+.christmas-bg{
+    position:fixed;
+    inset:0;
+    background:linear-gradient(135deg,#8B0000,#DC143C,#8B0000);
+    z-index:1;
+    overflow:hidden;
+}
+
+.snowflake{
+    position:absolute;
+    font-size:1.3em;
+    color:#fff;
+    animation:fall linear infinite;
+}
+@keyframes fall{
+    from{transform:translateY(-10vh);opacity:1}
+    to{transform:translateY(110vh);opacity:.3}
+}
+
+.circle{
+    position:absolute;
+    border-radius:50%;
+    opacity:.25;
+    animation:float 6s ease-in-out infinite;
+}
+@keyframes float{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-20px)}
+}
+
+.sparkle{
+    position:absolute;
+    color:gold;
+    animation:spark 2s infinite;
+}
+@keyframes spark{
+    0%,100%{opacity:0;transform:scale(0)}
+    50%{opacity:1;transform:scale(1.4)}
+}
+
+/* Container */
+.container{
+    position:relative;
+    z-index:2;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    overflow-y:auto;
+}
+
+/* Header GIF */
+.merry-gif{
+    display:flex;
+    justify-content:center;
+    margin-bottom:15px;
+}
+.merry-gif img{
+    width:260px;
+    max-width:90%;
+    filter:drop-shadow(0 0 25px gold);
+    animation:gifGlow 2s infinite alternate;
+}
+@keyframes gifGlow{
+    from{transform:scale(1)}
+    to{transform:scale(1.05)}
+}
+
+.tree{
+    font-size:3em;
+    margin-bottom:20px;
+    animation:pulse 2s infinite;
+}
+@keyframes pulse{
+    50%{transform:scale(1.1)}
+}
+
+/* Card */
+.card{
+    background:#fff;
+    padding:28px;
+    border-radius:22px;
+    width:95%;
+    max-width:420px;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+.card h2{
+    color:#8B0000;
+    margin-bottom:20px;
+}
+
+/* Input */
+input{
+    width:100%;
+    padding:16px;
+    font-size:1.1em;
+    border-radius:14px;
+    border:2px solid #DC143C;
+    outline:none;
+    margin-bottom:15px;
+}
+
+/* Buttons */
+.btn{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:14px;
+    font-size:1em;
+    font-weight:bold;
+    margin-top:12px;
+    cursor:pointer;
+}
+.btn:active{transform:scale(.95)}
+
+.btn-generate{background:#00cc00}
+.btn-whatsapp{background:#25D366;color:#fff}
+.btn-copy{background:#4A90E2;color:#fff}
+.btn-share{background:#DC143C;color:#fff}
+
+.hidden{display:none}
+
+/* Toast */
+.toast{
+    position:fixed;
+    bottom:30px;
+    left:50%;
+    transform:translateX(-50%) translateY(100px);
+    background:#00ff00;
+    padding:14px 28px;
+    border-radius:50px;
+    font-weight:bold;
+    transition:.3s;
+    z-index:999;
+}
+.toast.show{
+    transform:translateX(-50%) translateY(0);
+}
+
+/* Music Button */
+.music-btn{
+    position:fixed;
+    top:20px;
+    right:20px;
+    z-index:999;
+    background:#fff;
+    border-radius:50%;
+    width:55px;
+    height:55px;
+    font-size:22px;
+    border:none;
+    box-shadow:0 5px 20px rgba(0,0,0,.4);
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🎵 Background Music -->
+<audio id="bgMusic" loop>
+    <source src="christmas-music.mp3" type="audio/mpeg">
+</audio>
+
+<button class="music-btn" onclick="toggleMusic()">🔇</button>
+
+<div class="christmas-bg" id="bg"></div>
+
+<div class="container">
+
+    <div class="merry-gif">
+        <img src="merry-christmas.gif" alt="Merry Christmas">
+    </div>
+    <div class="tree">🎄</div>
+
+    <div class="card" id="generator">
+        <h2>🎅 Greeting Link बनाएं</h2>
+        <input id="nameInput" placeholder="अपना नाम लिखें">
+        <button class="btn btn-generate" onclick="generate()">✨ Link बनाएं</button>
+    </div>
+
+    <div class="card hidden" id="greeting">
+        <div style="font-size:1.2em;color:#333">
+            <div id="senderName" style="font-size:1.6em;color:#DC143C;font-weight:bold"></div>
+            की तरफ से आपको <br><b>🎄 Christmas Day 🎄</b><br>
+            की हार्दिक शुभकामनाएं!
+        </div>
+        <button class="btn btn-whatsapp" onclick="shareWhatsApp()">WhatsApp भेजें</button>
+        <button class="btn btn-copy" onclick="copyLink()">Link Copy</button>
+        <button class="btn btn-share" onclick="shareOther()">Other Apps</button>
+    </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* Background */
+function createBG(){
+    const bg=document.getElementById("bg");
+    for(let i=0;i<30;i++){
+        let s=document.createElement("div");
+        s.className="snowflake";
+        s.innerHTML=Math.random()>.5?"❄️":"⭐";
+        s.style.left=Math.random()*100+"%";
+        s.style.animationDuration=(Math.random()*3+5)+"s";
+        bg.appendChild(s);
+    }
+}
+createBG();
+
+/* Toast */
+function toast(msg){
+    const t=document.getElementById("toast");
+    t.textContent=msg;
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"),3000);
+}
+
+/* Greeting Logic */
+let link="", sender="";
+
+function generate(){
+    startMusic(); // 🔊 magic autoplay trigger
+
+    const n=document.getElementById("nameInput").value.trim();
+    if(!n){toast("नाम लिखें");return;}
+
+    link=location.origin+location.pathname+"?name="+encodeURIComponent(n);
+    history.pushState({},'',link);
+    showGreeting(n);
+}
+
+function showGreeting(n){
+    sender=n;
+    document.getElementById("generator").classList.add("hidden");
+    document.getElementById("greeting").classList.remove("hidden");
+    document.getElementById("senderName").textContent=n;
+}
+
+/* Share */
+function shareWhatsApp(){
+    const msg=`🎄 Merry Christmas 🎄\n\n${sender} की तरफ से Christmas की शुभकामनाएं!\n\n${link}`;
+    window.open("https://wa.me/?text="+encodeURIComponent(msg));
+}
+
+function copyLink(){
+    navigator.clipboard.writeText(link);
+    toast("Link Copy हो गया");
+}
+
+function shareOther(){
+    if(navigator.share){
+        navigator.share({title:"Merry Christmas",text:"Christmas Wishes 🎄",url:link});
+    }else{
+        copyLink();
+    }
+}
+
+/* 🎵 MAGIC AUTO PLAY */
+const music=document.getElementById("bgMusic");
+const btn=document.querySelector(".music-btn");
+let musicStarted=false;
+
+function startMusic(){
+    if(!musicStarted){
+        music.volume=0.7;
+        music.play().then(()=>{
+            musicStarted=true;
+            btn.textContent="🔊";
+        }).catch(()=>{});
+    }
+}
+
+document.addEventListener("click",startMusic);
+document.addEventListener("touchstart",startMusic);
+document.addEventListener("scroll",startMusic);
+
+function toggleMusic(){
+    if(music.paused){
+        music.play();
+        btn.textContent="🔊";
+    }else{
+        music.pause();
+        btn.textContent="🔇";
+    }
+}
+</script>
+
+</body>
+</html>
+
+<script>
+  atOptions = {
+    'key' : '36953ff24b72c3949e8cf25437907b2b',
+    'format' : 'iframe',
+    'height' : 60,
+    'width' : 468,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/36953ff24b72c3949e8cf25437907b2b/invoke.js"></script>
